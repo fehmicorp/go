@@ -20,8 +20,8 @@ func RunWailsApp() {
 
 	err := wails.Run(&options.App{
 		Title:  "Fehmi Cloud Connector",
-		Width:  600,
-		Height: 600,
+		Width:  450,
+		Height: 500,
 		AssetServer: &assetserver.Options{
 			Assets: Assets,
 		},
