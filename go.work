@@ -1,0 +1,12 @@
+go 1.26.4
+
+use (
+	./cmd/cloud
+	./cmd/win
+	./pkg/v1/http
+	./pkg/v1/srvc
+	./pkg/v1/sysd
+	./pkg/v1/win/notify
+	./pkg/v1/win/systray
+	./pkg/v1/win/systray/app
+)

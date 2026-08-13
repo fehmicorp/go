@@ -1,0 +1,73 @@
+
+:root {
+  /* Primary Brand Accent */
+  --fehmicorp-primary: #0284c7;    /* Sky Blue Accent */
+  --fehmicorp-primary-dark: #0369a1;
+  --fehmicorp-primary-light: #38bdf8;
+
+  /* Neutral Shades (Default: Dark Mode - Stone 950 base) */
+  --bg-base: #0c0a09;        /* Stone 950 */
+  --bg-surface: #1c1917;     /* Stone 900 */
+  --bg-elevated: #292524;    /* Stone 800 */
+  
+  --text-main: #f5f5f4;      /* Stone 100 */
+  --text-muted: #a8a29e;     /* Stone 400 */
+  --text-subtle: #78716c;    /* Stone 500 */
+
+  /* Specialized Component Colors (Dark Mode) */
+  --bg-card: #1c1917;        /* Card Background (Stone 900) */
+  --border-card: #292524;    /* Card Border (Stone 800) */
+  
+  --bg-hero-from: #1c1917;   /* Hero Gradient Start */
+  --bg-hero-to: #0c0a09;     /* Hero Gradient End */
+
+  --bg-notification: #292524; /* Notification Container */
+  --border-notification: #44403c; /* Notification Border (Stone 700) */
+
+  --bg-banner: #0369a1;      /* Top Message / Banner Background */
+  --text-banner: #e0f2fe;    /* Top Message Text */
+
+  /* System Status Colors */
+  --color-success: #10b981;  /* Emerald 500 */
+  --color-warning: #f59e0b;  /* Amber 500 */
+  --color-danger: #ef4444;   /* Red 500 */
+  --color-info: #0ea5e9;     /* Light Blue 500 */
+
+  /* Borders & Dividers */
+  --border-color: #292524;   /* Stone 800 */
+  --border-subtle: #1c1917;  /* Stone 900 */
+}
+
+/* Light Theme Configuration */
+[data-theme="light"] {
+  --bg-base: #fafaf9;        /* Stone 50 */
+  --bg-surface: #ffffff;     /* White */
+  --bg-elevated: #f5f5f4;    /* Stone 100 */
+  
+  --text-main: #1c1917;      /* Stone 900 */
+  --text-muted: #78716c;     /* Stone 500 */
+  --text-subtle: #a8a29e;    /* Stone 400 */
+
+  /* Specialized Component Colors (Light Mode) */
+  --bg-card: #ffffff;        /* Card Background */
+  --border-card: #e7e5e4;    /* Card Border (Stone 200) */
+  
+  --bg-hero-from: #f5f5f4;   /* Hero Gradient Start */
+  --bg-hero-to: #fafaf9;     /* Hero Gradient End */
+
+  --bg-notification: #f5f5f4; /* Notification Container */
+  --border-notification: #d6d3d1; /* Notification Border (Stone 300) */
+
+  --bg-banner: #e0f2fe;      /* Top Message / Banner Background */
+  --text-banner: #0369a1;    /* Top Message Text */
+
+  --border-color: #e7e5e4;   /* Stone 200 */
+  --border-subtle: #f5f5f4;  /* Stone 100 */
+}
+
+body {
+  background-color: var(--bg-base);
+  color: var(--text-main);
+  min-height: 100vh;
+  font-family: var(--font-geist-sans, system-ui, -apple-system, sans-serif);
+}

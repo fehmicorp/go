@@ -1,0 +1,58 @@
+# syntax=docker/dockerfile:1
+
+ARG APP=cloud
+ARG TYPE=local
+ARG PORT=8080
+ARG HOST=0.0.0.0
+ARG APPDIR=app
+
+# --- Frontend Builder ---
+FROM node:20-alpine AS frontend-builder
+ARG APP
+ARG TYPE
+WORKDIR /web
+ENV OUTPUT=$TYPE
+COPY web/config/ ./config/
+
+WORKDIR /web/app
+COPY web/${APP}/package.json web/${APP}/package-lock.json* ./
+RUN npm install
+
+COPY web/${APP}/ ./
+RUN npm run build
+
+# --- Backend Builder ---
+FROM golang:1.26.4-alpine AS backend-builder
+ARG APP
+ARG PORT
+ARG HOST
+ARG APPDIR
+
+WORKDIR /build/web
+RUN apk add --no-cache git
+COPY cmd/${APP}/go.mod cmd/${APP}/go.sum* ./
+RUN go mod download
+
+# Copy backend source code & frontend artifacts into a local 'app' folder
+COPY cmd/${APP}/ ./
+COPY --from=frontend-builder /web/app/out ./app
+
+# Bake build arguments permanently into Go variables using -ldflags
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
+    -ldflags="-X 'main.DefaultPort=${PORT}' -X 'main.DefaultHost=${HOST}' -X 'main.DefaultAppDir=${APPDIR}'" \
+    -o connector .
+
+RUN CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build \
+    -ldflags="-X 'main.DefaultPort=${PORT}' -X 'main.DefaultHost=${HOST}' -X 'main.DefaultAppDir=${APPDIR}'" \
+    -o connector.exe .
+
+# --- Final Output Stage ---
+FROM alpine:latest
+WORKDIR /output/web
+
+COPY --from=backend-builder /build/web/connector ./
+COPY --from=backend-builder /build/web/connector.exe ./
+COPY --from=backend-builder /build/web/app ./app
+RUN zip -r windown-web.zip connector.exe connector.exe app/
+RUN zip -r linux-web.zip connector connector app/
+CMD ["echo", "Release bundle created successfully at /output/fehmi-connector-release.zip"]
