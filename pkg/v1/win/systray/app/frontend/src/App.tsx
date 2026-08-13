@@ -37,6 +37,13 @@ interface Service {
     status?: Status;
 }
 
+interface VersionCheckResult {
+    Installed: boolean;
+    LocalVersion: string;
+    RemoteVersion: string;
+    UpdateAvailable: boolean;
+}
+
 declare global {
     interface Window {
         go?: {
@@ -44,6 +51,7 @@ declare global {
                 App?: {
                     GetServiceList(): Promise<Service[]>;
                     ServiceAction(name: string, action: string): Promise<void>;
+                    CheckServiceVersion(name: string): Promise<VersionCheckResult>;
                 };
             };
         };
@@ -52,14 +60,32 @@ declare global {
 
 function App() {
     const [services, setServices] = useState<Service[]>([]);
+    const [serviceVersions, setServiceVersions] = useState<Record<string, VersionCheckResult>>({});
     const [loading, setLoading] = useState<boolean>(true);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+    const fetchVersions = async (serviceList: Service[]) => {
+        if (!window.go?.main?.App?.CheckServiceVersion) return;
+        
+        const versionMap: Record<string, VersionCheckResult> = {};
+        for (const srv of serviceList) {
+            try {
+                const vRes = await window.go.main.App.CheckServiceVersion(srv.name);
+                versionMap[srv.name] = vRes;
+            } catch (err) {
+                console.error(`Failed to fetch version for ${srv.name}:`, err);
+            }
+        }
+        setServiceVersions(versionMap);
+    };
 
     const fetchServices = async () => {
         try {
             if (window.go?.main?.App?.GetServiceList) {
                 const list = await window.go.main.App.GetServiceList();
-                setServices(list || []);
+                const validList = list || [];
+                setServices(validList);
+                await fetchVersions(validList);
             }
         } catch (err) {
             console.error("Failed to fetch service list:", err);
@@ -70,7 +96,7 @@ function App() {
 
     useEffect(() => {
         fetchServices();
-        const interval = setInterval(fetchServices, 3000);
+        const interval = setInterval(fetchServices, 5000);
         return () => clearInterval(interval);
     }, []);
 
@@ -120,7 +146,7 @@ function App() {
                             const isRunning = service.status?.running ?? false;
                             const isActive = service.status?.active ?? false;
                             const isStartupAuto = service.status?.startup ?? false;
-                            const primaryTag = service.tags?.[0] || service.runtime_type;
+                            const verInfo = serviceVersions[service.name];
 
                             return (
                                 <div 
@@ -138,11 +164,12 @@ function App() {
                                                 <span className="text-[11px] px-2 py-0.5 rounded font-mono" style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--text-muted)' }}>
                                                     Runtime: {service.runtime_type}
                                                 </span>
-                                                {service.package?.version && (
-                                                    <span className="text-[11px] px-2 py-0.5 rounded font-mono" style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--text-muted)' }}>
-                                                        Ver: {service.package.version}
-                                                    </span>
-                                                )}
+                                                <span className="text-[11px] px-2 py-0.5 rounded font-mono" style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--text-muted)' }}>
+                                                    Installed: {verInfo?.Installed ? (verInfo.LocalVersion || 'Yes') : 'Not Installed'}
+                                                </span>
+                                                <span className="text-[11px] px-2 py-0.5 rounded font-mono" style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--text-muted)' }}>
+                                                    Listed: {service.package?.version || 'N/A'}
+                                                </span>
                                             </div>
                                         </div>
 
@@ -169,13 +196,13 @@ function App() {
                                                     <button 
                                                         disabled={actionLoading === `${service.name}-restart`}
                                                         onClick={() => handleAction(service.name, 'restart')}
-                                                        className="px-3 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 rounded-lg transition font-medium disabled:opacity-50">
+                                                        className="px-3 py-1 bg-amber-500/25 hover:bg-amber-500/35 text-amber-300 border border-amber-500/40 rounded-lg transition font-medium disabled:opacity-50">
                                                         {actionLoading === `${service.name}-restart` ? 'Processing...' : 'Restart'}
                                                     </button>
                                                     <button 
                                                         disabled={actionLoading === `${service.name}-stop`}
                                                         onClick={() => handleAction(service.name, 'stop')}
-                                                        className="px-3 py-1 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 rounded-lg transition font-medium disabled:opacity-50">
+                                                        className="px-3 py-1 bg-rose-500/25 hover:bg-rose-500/35 text-rose-300 border border-rose-500/40 rounded-lg transition font-medium disabled:opacity-50">
                                                         {actionLoading === `${service.name}-stop` ? 'Processing...' : 'Stop'}
                                                     </button>
                                                 </>
@@ -183,7 +210,7 @@ function App() {
                                                 <button 
                                                     disabled={actionLoading === `${service.name}-start`}
                                                     onClick={() => handleAction(service.name, 'start')}
-                                                    className="px-3 py-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 rounded-lg transition font-medium disabled:opacity-50">
+                                                    className="px-3 py-1 bg-emerald-500/25 hover:bg-emerald-500/35 text-emerald-300 border border-emerald-500/40 rounded-lg transition font-medium disabled:opacity-50">
                                                     {actionLoading === `${service.name}-start` ? 'Processing...' : 'Start'}
                                                 </button>
                                             )}

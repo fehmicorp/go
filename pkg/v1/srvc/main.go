@@ -25,31 +25,92 @@ func (s *Services) Uninstall() error {
 	return s.uninstallLinux()
 }
 
-// Start launches the service
-func (s *Services) Start() error {
-	if runtime.GOOS == "windows" {
-		return s.controlWindows("start")
-	}
-	return exec.Command("systemctl", "start", s.Name).Run()
-}
-
-// Stop halts the service
 func (s *Services) Stop() error {
 	if runtime.GOOS == "windows" {
-		return s.controlWindows("stop")
+		// Stop via Windows Service Control Manager (SCM)
+		cmdStr := fmt.Sprintf(`Stop-Service -Name "%s" -Force -ErrorAction SilentlyContinue`, s.Name)
+		cmd := exec.Command("powershell", "-Command", cmdStr)
+		if err := cmd.Run(); err == nil {
+			s.Status.Running = false
+			s.Status.Active = false
+			return nil
+		}
+
+		// Fallback for Docker if service name relates to docker
+		if strings.Contains(strings.ToLower(s.Name), "docker") {
+			dockerCmd := exec.Command("net", "stop", "com.docker.service")
+			if dockerCmd.Run() == nil {
+				s.Status.Running = false
+				s.Status.Active = false
+				return nil
+			}
+		}
+
+		return fmt.Errorf("failed to stop Windows service: %s", s.Name)
 	}
-	return exec.Command("systemctl", "stop", s.Name).Run()
+
+	// Linux / macOS fallback using systemctl
+	cmd := exec.Command("systemctl", "stop", s.Name)
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to stop systemctl service %s: %w", s.Name, err)
+	}
+
+	s.Status.Running = false
+	s.Status.Active = false
+	return nil
 }
 
-// Restart reloads the service
+// Restart performs a stop followed by a start operation
 func (s *Services) Restart() error {
 	if runtime.GOOS == "windows" {
+		// Restart via Windows Service Control Manager (SCM)
+		cmdStr := fmt.Sprintf(`Restart-Service -Name "%s" -Force -ErrorAction SilentlyContinue`, s.Name)
+		cmd := exec.Command("powershell", "-Command", cmdStr)
+		if err := cmd.Run(); err == nil {
+			s.Status.Running = true
+			s.Status.Active = true
+			return nil
+		}
+
+		// Fallback if Restart-Service fails: explicit Stop then Start
 		if err := s.Stop(); err != nil {
-			// Ignore stop error if already stopped, then try starting
+			return err
 		}
 		return s.Start()
 	}
-	return exec.Command("systemctl", "restart", s.Name).Run()
+
+	// Linux / macOS fallback using systemctl
+	cmd := exec.Command("systemctl", "restart", s.Name)
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to restart systemctl service %s: %w", s.Name, err)
+	}
+
+	s.Status.Running = true
+	s.Status.Active = true
+	return nil
+}
+
+// Start initiates the service (included for complete control mapping)
+func (s *Services) Start() error {
+	if runtime.GOOS == "windows" {
+		cmdStr := fmt.Sprintf(`Start-Service -Name "%s" -ErrorAction SilentlyContinue`, s.Name)
+		cmd := exec.Command("powershell", "-Command", cmdStr)
+		if err := cmd.Run(); err == nil {
+			s.Status.Running = true
+			s.Status.Active = true
+			return nil
+		}
+		return fmt.Errorf("failed to start Windows service: %s", s.Name)
+	}
+
+	cmd := exec.Command("systemctl", "start", s.Name)
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to start systemctl service %s: %w", s.Name, err)
+	}
+
+	s.Status.Running = true
+	s.Status.Active = true
+	return nil
 }
 
 // --- Windows Internal Implementations ---
