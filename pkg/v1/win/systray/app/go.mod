@@ -1,8 +1,11 @@
 module github.com/fehmicorp/go/pkg/v1/win/systray/app
 
-go 1.25.0
+go 1.26.4
 
-require github.com/wailsapp/wails/v2 v2.14.0
+require (
+	github.com/fehmicorp/go/pkg/v1/srvc v0.0.0-20260813131200-9fdf02eb286e
+	github.com/wailsapp/wails/v2 v2.14.0
+)
 
 require (
 	git.sr.ht/~jackmordaunt/go-toast/v2 v2.0.3 // indirect
@@ -24,7 +27,13 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/samber/lo v1.49.1 // indirect
+	github.com/supabase-community/functions-go v0.0.0-20220927045802-22373e6cb51d // indirect
+	github.com/supabase-community/gotrue-go v1.2.0 // indirect
+	github.com/supabase-community/postgrest-go v0.0.11 // indirect
+	github.com/supabase-community/storage-go v0.7.0 // indirect
+	github.com/supabase-community/supabase-go v0.0.4 // indirect
 	github.com/tkrajina/go-reflector v0.5.8 // indirect
+	github.com/tomnomnom/linkheader v0.0.0-20180905144013-02ca5825eb80 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/wailsapp/go-webview2 v1.0.22 // indirect

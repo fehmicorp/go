@@ -15,13 +15,60 @@ type VersionCheckResult struct {
 	UpdateAvailable bool
 }
 
+func (s *Services) RefreshStatus() error {
+	if runtime.GOOS == "windows" {
+		// Check Windows service status directly via PowerShell SCM
+		cmdStr := fmt.Sprintf(`(Get-Service -Name "%s" -ErrorAction SilentlyContinue).Status`, s.Name)
+		cmd := exec.Command("powershell", "-Command", cmdStr)
+		out, err := cmd.Output()
+		if err == nil {
+			statusStr := strings.TrimSpace(string(out))
+			if statusStr == "Running" {
+				s.Status.Running = true
+				s.Status.Active = true
+				return nil
+			}
+		}
+
+		// Fallback check if it's Docker specifically
+		if strings.Contains(strings.ToLower(s.Name), "docker") {
+			dockerCmd := exec.Command("docker", "info")
+			if dockerCmd.Run() == nil {
+				s.Status.Running = true
+				s.Status.Active = true
+				return nil
+			}
+		}
+
+		s.Status.Running = false
+		s.Status.Active = false
+		return nil
+	}
+
+	// Linux / macOS fallback port or systemctl check...
+	return nil
+}
+
 // CheckLocalVersion inspects the host system to see if the package is installed,
 // retrieves its version, and compares it against the remote target version.
 func (s *Services) CheckLocalVersion() (VersionCheckResult, error) {
-	if runtime.GOOS == "windows" {
-		return s.checkWindowsVersion()
+	result := VersionCheckResult{
+		Installed:     false,
+		RemoteVersion: s.Package.Version,
 	}
-	return s.checkLinuxVersion()
+
+	if runtime.GOOS == "windows" {
+		cmdStr := fmt.Sprintf(`(Get-Service -Name "%s" -ErrorAction SilentlyContinue).Status`, s.Name)
+		cmd := exec.Command("powershell", "-Command", cmdStr)
+		out, err := cmd.Output()
+		if err != nil || strings.TrimSpace(string(out)) == "" {
+			return result, nil
+		}
+		result.Installed = true
+		result.LocalVersion = "Active" // Or fetch actual product version if available
+	}
+
+	return result, nil
 }
 
 // --- Windows Version Checking ---

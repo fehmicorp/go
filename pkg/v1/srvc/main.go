@@ -52,14 +52,6 @@ func (s *Services) Restart() error {
 	return exec.Command("systemctl", "restart", s.Name).Run()
 }
 
-// RefreshStatus updates the Status struct properties in-place
-func (s *Services) RefreshStatus() error {
-	if runtime.GOOS == "windows" {
-		return s.refreshStatusWindows()
-	}
-	return s.refreshStatusLinux()
-}
-
 // --- Windows Internal Implementations ---
 
 func (s *Services) installWindows(execPath string) error {

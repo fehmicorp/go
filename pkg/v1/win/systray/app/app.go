@@ -18,9 +18,16 @@ type App struct {
 }
 
 func NewApp() *App {
+	key := os.Getenv("SUPABASE_SECRET_KEY")
+	if key == "" {
+		key = os.Getenv("SUPABASE_PUBLISHABLE_KEY")
+	}
+	if key == "" {
+		key = os.Getenv("SUPABASE_ANON_KEY")
+	}
 	return &App{
 		supabaseURL: os.Getenv("SUPABASE_URL"),
-		supabaseKey: os.Getenv("SUPABASE_ANON_KEY"),
+		supabaseKey: key,
 	}
 }
 
@@ -39,7 +46,6 @@ func (a *App) Startup(ctx context.Context) {
 func getTarget() (string, string) {
 	return runtime.GOOS, runtime.GOARCH
 }
-
 func (a *App) GetServiceList() []srvc.Services {
 	targetOS, targetArch := getTarget()
 	list, err := srvc.FetchFilteredServices(a.supabaseURL, a.supabaseKey, targetOS, targetArch)
@@ -48,7 +54,7 @@ func (a *App) GetServiceList() []srvc.Services {
 		return a.cachedServices
 	}
 
-	// Update live system statuses
+	// Update live system statuses using the enhanced RefreshStatus logic
 	for i := range list {
 		_ = list[i].RefreshStatus()
 	}
