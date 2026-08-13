@@ -46,6 +46,7 @@ func (a *App) Startup(ctx context.Context) {
 func getTarget() (string, string) {
 	return runtime.GOOS, runtime.GOARCH
 }
+
 func (a *App) GetServiceList() []srvc.Services {
 	targetOS, targetArch := getTarget()
 	list, err := srvc.FetchFilteredServices(a.supabaseURL, a.supabaseKey, targetOS, targetArch)
