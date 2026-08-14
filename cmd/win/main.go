@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"fmt"
 	"log"
+	"runtime"
 
 	"github.com/fehmicorp/go/pkg/v1/win/notify"
 	"github.com/fehmicorp/go/pkg/v1/win/systray"
@@ -23,13 +24,32 @@ type AppConfig struct {
 
 var Conf = AppConfig{
 	AppName:     "Fehmi Cloud Connector",
-	Description: "Standalone Windows System Tray application",
+	Description: "Standalone System Tray application",
 	Icon:        "assets/icon.png",
 	Version:     "1.0.0",
 	Domain:      "fehmicorp.in",
 }
 
+var Target = struct {
+	OS   string
+	Arch string
+}{
+	OS:   runtime.GOOS,
+	Arch: runtime.GOARCH,
+}
+
 func main() {
+	switch Target.OS {
+	case "windows":
+		Windows(Target.Arch)
+	case "linux":
+		Linux(Target.Arch)
+	default:
+		log.Fatalf("Unsupported operating system: %s", Target.OS)
+	}
+}
+
+func Windows(Arch string) {
 	app := application.New(application.Options{
 		Name:        Conf.AppName,
 		Description: Conf.Description,
@@ -63,11 +83,26 @@ func main() {
 	notify.HandleClickCheck()
 
 	Tooltip := fmt.Sprintf("%s\nVersion: %s\n%s", Conf.AppName, Conf.Version, Conf.Domain)
-	customMenus := PrepareMenuItems()
+	customMenus := PrepareMenuItems(app)
 
 	systray.NewTrayManager(app, trayIcon, Tooltip, customMenus)
 
 	if err := app.Run(); err != nil {
 		log.Fatalf("❌ System tray service failed: %v", err)
+	}
+}
+
+func Linux(Arch string) {
+	app := application.New(application.Options{
+		Name:        Conf.AppName,
+		Description: Conf.Description,
+	})
+
+	Tooltip := fmt.Sprintf("%s\nVersion: %s\n%s", Conf.AppName, Conf.Version, Conf.Domain)
+	customMenus := PrepareMenuItems(app)
+	systray.NewTrayManager(app, trayIcon, Tooltip, customMenus)
+
+	if err := app.Run(); err != nil {
+		log.Fatalf("❌ Linux system tray service failed: %v", err)
 	}
 }

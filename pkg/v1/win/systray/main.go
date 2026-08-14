@@ -40,7 +40,7 @@ func NewTrayManager(app *application.App, iconData []byte, tooltip string, custo
 
 	menu.AddSeparator()
 
-	menu.Add("Exit").OnClick(func(ctx *application.Context) {
+	menu.Add("Close").OnClick(func(ctx *application.Context) {
 		app.Quit()
 	})
 
