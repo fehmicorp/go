@@ -29,6 +29,12 @@ var (
 var TrayMenu []MenuOptions
 
 func initTrayMenu() {
+	serverMutex.Lock()
+	serverStatusTitle := "Start"
+	if isServerRunning {
+		serverStatusTitle = "Stop"
+	}
+	serverMutex.Unlock()
 	TrayMenu = []MenuOptions{
 		{
 			Title: "Dashboard",
@@ -50,7 +56,7 @@ func initTrayMenu() {
 			},
 		},
 		{
-			Title:   "Start",
+			Title:   serverStatusTitle,
 			Type:    "action",
 			Tag:     "start",
 			Dynamic: true,
@@ -66,6 +72,22 @@ func initTrayMenu() {
 			},
 		},
 		{
+			Title:   getAutoStartMenuTitle(Cfg.AtStartup),
+			Type:    "action",
+			Tag:     "toggle_autostart",
+			Dynamic: true,
+			Func: func(ctx *application.Context) {
+				cfgMutex.Lock()
+				Cfg.AtStartup = !Cfg.AtStartup
+				SaveConfigLocked(Cfg)
+				updatedAtStartup := Cfg.AtStartup
+				cfgMutex.Unlock()
+				fmt.Printf("Auto-start on boot updated to: %v\n", updatedAtStartup)
+				initTrayMenu()
+				updateTrayState()
+			},
+		},
+		{
 			Title: "Logs",
 			Type:  "file",
 			Tag:   "logs",
@@ -75,6 +97,13 @@ func initTrayMenu() {
 			},
 		},
 	}
+}
+
+func getAutoStartMenuTitle(atStartup bool) string {
+	if atStartup {
+		return "✓ Start at System Startup"
+	}
+	return "Start at System Startup"
 }
 
 func updateTrayState() {
