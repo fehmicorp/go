@@ -10,9 +10,10 @@ import (
 	"sync"
 	"time"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
+// Level defines log severity
 type Level string
 
 const (
@@ -48,22 +49,20 @@ var (
 func Init(dbDir string, dbFileName string, bufferSize int, batchSize int, flushPeriod time.Duration) error {
 	var err error
 	once.Do(func() {
-		// Ensure directory exists
 		if err = os.MkdirAll(dbDir, 0755); err != nil {
 			return
 		}
 
 		dbPath := filepath.Join(dbDir, dbFileName)
-		db, e := sql.Open("sqlite3", dbPath+"?_journal=WAL&_sync=NORMAL")
+		// Note: driver name is "sqlite" for modernc.org/sqlite
+		db, e := sql.Open("sqlite", dbPath+"?_pragma=journal_mode(WAL)&_pragma=synchronous(NORMAL)")
 		if e != nil {
 			err = e
 			return
 		}
 
-		// SQLite works best with a single open connection for writing to avoid locks
 		db.SetMaxOpenConns(1)
 
-		// Create table schema if it doesn't exist
 		createTableQuery := `
 		CREATE TABLE IF NOT EXISTS application_logs (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -113,14 +112,11 @@ func (l *Logger) Log(level Level, category, message string, metadata map[string]
 
 	select {
 	case l.buffer <- entry:
-		// Queued successfully
 	default:
-		// Fallback to standard output if buffer is flooded
 		log.Printf("[LOGGER_DROPPED] [%s] [%s] %s", level, category, message)
 	}
 }
 
-// Convenience wrapper functions
 func Info(category, message string, metadata map[string]interface{}) {
 	if globalLogger != nil {
 		globalLogger.Log(LevelInfo, category, message, metadata)
@@ -145,7 +141,6 @@ func Debug(category, message string, metadata map[string]interface{}) {
 	}
 }
 
-// worker flushes logs asynchronously in batches
 func (l *Logger) worker() {
 	defer l.wg.Done()
 
@@ -189,7 +184,6 @@ func (l *Logger) worker() {
 	}
 }
 
-// writeBatchToDB performs bulk inserts using a single transaction
 func (l *Logger) writeBatchToDB(batch []LogEntry) error {
 	tx, err := l.db.Begin()
 	if err != nil {
@@ -223,7 +217,6 @@ func (l *Logger) writeBatchToDB(batch []LogEntry) error {
 	return tx.Commit()
 }
 
-// Close gracefully flushes remaining logs and closes the SQLite file connection
 func Close() {
 	if globalLogger != nil {
 		globalLogger.cancel()

@@ -12,7 +12,7 @@ import (
 // openLogsViewer reads sqlite records, formats them into a text report, and opens it in Notepad/Editor
 func openLogsViewer() {
 	dbPath := filepath.Join("./data", "logs.db")
-	db, err := sql.Open("sqlite3", dbPath+"?mode=ro") // Open database in read-only mode to prevent locks
+	db, err := sql.Open("sqlite", dbPath+"?mode=ro") // Open database in read-only mode to prevent locks
 	if err != nil {
 		log.Printf("Failed to open logs database for reading: %v", err)
 		return

@@ -6,6 +6,7 @@ require (
 	github.com/fehmicorp/go/pkg/v1/http v0.0.0-20260814103417-433a13b2ef97
 	github.com/fehmicorp/go/pkg/v1/win/notify v0.0.0-20260813134100-b23d4891bc80
 	github.com/fehmicorp/go/pkg/v1/win/systray v0.0.0-20260814103417-433a13b2ef97
+	github.com/mattn/go-sqlite3 v1.14.49
 	github.com/wailsapp/wails/v3 v3.0.0-beta.8
 )
 
