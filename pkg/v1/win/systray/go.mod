@@ -2,7 +2,7 @@ module github.com/fehmicorp/go/pkg/v1/win/systray
 
 go 1.26.4
 
-require github.com/wailsapp/wails/v3 v3.0.0-beta.7
+require github.com/wailsapp/wails/v3 v3.0.0-beta.8
 
 require (
 	github.com/adrg/xdg v0.5.3 // indirect
@@ -12,5 +12,5 @@ require (
 	github.com/jchv/go-winloader v0.0.0-20250406163304-c1995be93bd1 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	golang.org/x/sys v0.46.0 // indirect
+	golang.org/x/sys v0.47.0 // indirect
 )

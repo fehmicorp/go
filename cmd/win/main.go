@@ -83,7 +83,7 @@ func Windows(Arch string) {
 	notify.HandleClickCheck()
 
 	Tooltip := fmt.Sprintf("%s\nVersion: %s\n%s", Conf.AppName, Conf.Version, Conf.Domain)
-	customMenus := PrepareMenuItems(app)
+	customMenus := PrepareMenuItems()
 
 	systray.NewTrayManager(app, trayIcon, Tooltip, customMenus)
 
@@ -99,7 +99,7 @@ func Linux(Arch string) {
 	})
 
 	Tooltip := fmt.Sprintf("%s\nVersion: %s\n%s", Conf.AppName, Conf.Version, Conf.Domain)
-	customMenus := PrepareMenuItems(app)
+	customMenus := PrepareMenuItems()
 	systray.NewTrayManager(app, trayIcon, Tooltip, customMenus)
 
 	if err := app.Run(); err != nil {

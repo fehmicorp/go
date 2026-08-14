@@ -3,11 +3,17 @@ module github.com/fehmicorp/go/connector
 go 1.26.4
 
 require (
+	github.com/fehmicorp/go/pkg/v1/http v0.0.0-20260814103417-433a13b2ef97
+	github.com/fehmicorp/go/pkg/v1/win/notify v0.0.0-20260813134100-b23d4891bc80
+	github.com/fehmicorp/go/pkg/v1/win/systray v0.0.0-20260814103417-433a13b2ef97
+	github.com/wailsapp/wails/v3 v3.0.0-beta.8
+)
+
+require (
 	git.sr.ht/~jackmordaunt/go-toast v1.1.2 // indirect
 	github.com/adrg/xdg v0.5.3 // indirect
 	github.com/coder/websocket v1.8.14 // indirect
 	github.com/esiqveland/notify v0.13.3 // indirect
-	github.com/fehmicorp/go/pkg/v1/win/notify v0.0.0-20260813134100-b23d4891bc80 // indirect
 	github.com/gen2brain/beeep v0.11.2 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/go-toast/toast v0.0.0-20190211030409-01e6764cf0a4 // indirect
@@ -21,6 +27,5 @@ require (
 	github.com/sergeymakinen/go-bmp v1.0.0 // indirect
 	github.com/sergeymakinen/go-ico v1.0.0-beta.0 // indirect
 	github.com/tadvi/systray v0.0.0-20190226123456-11a2b8fa57af // indirect
-	github.com/wailsapp/wails/v3 v3.0.0-beta.8 // indirect
-	golang.org/x/sys v0.46.0 // indirect
+	golang.org/x/sys v0.47.0 // indirect
 )

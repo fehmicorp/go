@@ -5,7 +5,7 @@ go 1.26.4
 require (
 	github.com/fehmicorp/go/pkg/v1/win/notify v0.0.0-20260813053444-b5038c8bb5c8
 	github.com/fehmicorp/go/pkg/v1/win/systray v0.0.0-20260812094449-573544e13f06
-	github.com/wailsapp/wails/v3 v3.0.0-beta.7
+	github.com/wailsapp/wails/v3 v3.0.0-beta.8
 )
 
 require (
@@ -26,5 +26,5 @@ require (
 	github.com/sergeymakinen/go-bmp v1.0.0 // indirect
 	github.com/sergeymakinen/go-ico v1.0.0-beta.0 // indirect
 	github.com/tadvi/systray v0.0.0-20190226123456-11a2b8fa57af // indirect
-	golang.org/x/sys v0.46.0 // indirect
+	golang.org/x/sys v0.47.0 // indirect
 )

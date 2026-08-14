@@ -4,7 +4,7 @@ go 1.26.4
 
 require (
 	github.com/supabase-community/supabase-go v0.0.4
-	golang.org/x/sys v0.46.0
+	golang.org/x/sys v0.47.0
 )
 
 require (

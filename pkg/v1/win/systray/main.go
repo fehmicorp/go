@@ -25,6 +25,26 @@ func NewTrayManager(app *application.App, iconData []byte, tooltip string, custo
 		systray.SetTooltip(tooltip)
 	}
 
+	tm := &TrayManager{
+		App:  app,
+		Tray: systray,
+	}
+
+	tm.Refresh(tooltip, customMenus)
+
+	return tm
+}
+
+// Refresh dynamically updates the system tray tooltip and rebuilds the menu items
+func (tm *TrayManager) Refresh(tooltip string, customMenus []MenuItemConfig) {
+	if tm.Tray == nil {
+		return
+	}
+
+	if tooltip != "" {
+		tm.Tray.SetTooltip(tooltip)
+	}
+
 	menu := application.NewMenu()
 
 	// Add user-defined custom menus
@@ -41,13 +61,8 @@ func NewTrayManager(app *application.App, iconData []byte, tooltip string, custo
 	menu.AddSeparator()
 
 	menu.Add("Close").OnClick(func(ctx *application.Context) {
-		app.Quit()
+		tm.App.Quit()
 	})
 
-	systray.SetMenu(menu)
-
-	return &TrayManager{
-		App:  app,
-		Tray: systray,
-	}
+	tm.Tray.SetMenu(menu)
 }
